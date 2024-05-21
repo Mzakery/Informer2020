@@ -267,7 +267,6 @@ class Exp_Informer(Exp_Basic):
             preds.append(pred.detach().cpu().numpy())
             trues.append(true.detach().cpu().numpy())
             
-            self.test_losses.append(loss.item())
             self.actual_test_values.append(true.detach().cpu().numpy())
             self.predicted_test_values.append(pred.detach().cpu().numpy())            
             
