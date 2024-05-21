@@ -215,7 +215,7 @@ class Exp_Informer(Exp_Basic):
                     train_data, batch_x, batch_y, batch_x_mark, batch_y_mark)
                 loss = criterion(pred, true)
                 train_loss.append(loss.item())
-                self.train_losses.append(loss.item())
+                
                 
                 if (i+1) % 100==0:
                     print("\titers: {0}, epoch: {1} | loss: {2:.7f}".format(i + 1, epoch + 1, loss.item()))
@@ -237,7 +237,8 @@ class Exp_Informer(Exp_Basic):
             train_loss = np.average(train_loss)
             vali_loss = self.vali(vali_data, vali_loader, criterion)
             test_loss = self.vali(test_data, test_loader, criterion)
-            #self.test_losses.append(test_loss)
+            self.train_losses.append(train_loss)
+            self.test_losses.append(test_loss)
             print("Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Vali Loss: {3:.7f} Test Loss: {4:.7f}".format(
                 epoch + 1, train_steps, train_loss, vali_loss, test_loss))
             early_stopping(vali_loss, self.model, path)
@@ -254,7 +255,7 @@ class Exp_Informer(Exp_Basic):
 
     def test(self, setting):
         test_data, test_loader = self._get_data(flag='test')
-        criterion =  self._select_criterion()
+        
         self.model.eval()
         
         preds = []
@@ -265,7 +266,7 @@ class Exp_Informer(Exp_Basic):
                 test_data, batch_x, batch_y, batch_x_mark, batch_y_mark)
             preds.append(pred.detach().cpu().numpy())
             trues.append(true.detach().cpu().numpy())
-            loss = criterion(pred, true)
+            
             self.test_losses.append(loss.item())
             self.actual_test_values.append(true.detach().cpu().numpy())
             self.predicted_test_values.append(pred.detach().cpu().numpy())            
