@@ -197,7 +197,7 @@ class Dataset_Custom(Dataset):
                  scale=True, 
                  inverse=False,
                  timeenc=0, 
-                 freq='h', 
+                 freq='b', 
                  cols=None, 
                  kind_of_scaler = None,
                  test_size = 0.2):
@@ -330,8 +330,9 @@ class Dataset_Custom(Dataset):
 
 class Dataset_Pred(Dataset):
     def __init__(self, root_path, flag='pred', size=None, 
-                 features='S', data_path='ETTh1.csv', 
-                 target='OT', scale=True, inverse=False, timeenc=0, freq='15min', cols=None):
+                 features='MS', data_path='data.csv', 
+                 target='Close', scale=True, inverse=False, timeenc=0, freq='b', cols=None,
+                 kind_of_scaler = None, test_size = None):
         # size [seq_len, label_len, pred_len]
         # info
         if size == None:
@@ -344,7 +345,10 @@ class Dataset_Pred(Dataset):
             self.pred_len = size[2]
         # init
         assert flag in ['pred']
-        
+
+        self.kind_of_scaler = kind_of_scaler if kind_of_scaler is not None else 'Standard'
+        self.test_size = test_size
+        self.train_size = None
         self.features = features
         self.target = target
         self.scale = scale
@@ -380,8 +384,36 @@ class Dataset_Pred(Dataset):
             df_data = df_raw[[self.target]]
 
         if self.scale:
-            self.scaler.fit(df_data.values)
-            data = self.scaler.transform(df_data.values)
+            if self.features=='S' or self.features=='MS':
+                col_scaled = []
+                for col in df_data.columns:
+                    col_data = df_data[[col]].values
+                    if self.kind_of_scaler == 'MinMax':
+                        if col == self.target:
+                            self.scaler = MinMaxScaler()
+                        else:
+                            scaler = MinMaxScaler()
+                    else:
+                        if col == self.target:
+                            self.scaler = StandardScaler()
+                        else:
+                            scaler = StandardScaler()
+                    if col == self.target:
+                        self.scaler.fit(col_data)
+                        joblib.dump(self.scaler, os.path.join(self.root_path, 'scaler.pkl'))
+                        col_temp = self.scaler.transform(col_data)
+                    else:
+                        scaler.fit(col_data)
+                        col_temp = scaler.transform(col_data)
+                    col_scaled.append(col_temp)
+                if len(col_scaled) == 1:
+                    data = col_scaled[0]
+                else:
+                    data = np.concatenate(col_scaled, axis = 1)
+            else:
+                self.scaler = StandardScaler()
+                self.scaler.fit(df_data.values)
+                data = self.scaler.transform(df_data.values)                
         else:
             data = df_data.values
             
