@@ -53,7 +53,7 @@ class dotdict(dict):
     __setattr__ = dict.__setitem__
     __delattr__ = dict.__delitem__
 
-
+"""
 class MinMaxScaler:
     def __init__(self, feature_range=(0, 1)):
         self.min = 0.
@@ -102,3 +102,4 @@ class StandardScaler():
             mean = mean[-1:]
             std = std[-1:]
         return (data * std) + mean
+"""
