@@ -105,8 +105,6 @@ class Exp_Informer(Exp_Basic):
             kind_of_scaler = args.kind_of_scaler,
             timeenc=timeenc,
             test_size = args.test_size,
-            take_data_instead_of_reading = args.take_data_instead_of_reading,
-            direct_data = direct_data,
             freq=freq,
             cols=args.cols
         )
